@@ -23,13 +23,12 @@ public abstract class ExtendedSliderWidget<T> extends SliderWidget {
     abstract T getValue();
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        int i = (this.isHovered() ? 2 : 1) * 20;
-        context.drawTexture(WIDGETS_TEXTURE, this.getX() + (int)(getOpticalValue() * (double)(this.width - 8)), this.getY(), 0, 46 + i, 4, 20);
-        context.drawTexture(WIDGETS_TEXTURE, this.getX() + (int)(getOpticalValue() * (double)(this.width - 8)) + 4, this.getY(), 196, 46 + i, 4, 20);
+        context.drawGuiTexture(this.getTexture(), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        context.drawGuiTexture(this.getHandleTexture(), this.getX() + (int)(this.getOpticalValue() * (double)(this.width - 8)), this.getY(), 8, this.getHeight());
 
-        super.renderButton(context, mouseX, mouseY, delta);
+        super.renderWidget(context, mouseX, mouseY, delta);
     }
 
     @Override

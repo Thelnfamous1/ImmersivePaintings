@@ -17,6 +17,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
@@ -70,9 +71,9 @@ public class ImmersivePaintingEntity extends AbstractImmersiveDecorationEntity {
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
-        this.motive = new Identifier(nbt.getString("Motive"));
-        this.frame = new Identifier(nbt.getString("Frame"));
-        this.material = new Identifier(nbt.getString("Material"));
+        this.motive = Identifier.of(nbt.getString("Motive"));
+        this.frame = Identifier.of(nbt.getString("Frame"));
+        this.material = Identifier.of(nbt.getString("Material"));
         this.updateMotiveDimensions();
         super.readCustomDataFromNbt(nbt);
     }
@@ -104,15 +105,17 @@ public class ImmersivePaintingEntity extends AbstractImmersiveDecorationEntity {
     }
 
     @Override
-    public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps, boolean interpolate) {
+    public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps) {
         BlockPos blockPos = this.attachmentPos.add(BlockPos.ofFloored(x - this.getX(), y - this.getY(), z - this.getZ()));
         this.setPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
+    /*
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
         return new EntitySpawnS2CPacket(this);
     }
+     */
 
     @Override
     public void onStartedTrackingBy(ServerPlayerEntity player) {
