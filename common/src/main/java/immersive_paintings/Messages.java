@@ -11,15 +11,15 @@ public class Messages {
     }
 
     static {
-        NetworkHandler.registerMessage(ImageRequest.class, ImageRequest::new);
-        NetworkHandler.registerMessage(PaintingListMessage.class, PaintingListMessage::new);
-        NetworkHandler.registerMessage(ImageResponse.class, ImageResponse::new);
-        NetworkHandler.registerMessage(PaintingModifyRequest.class, PaintingModifyRequest::new);
-        NetworkHandler.registerMessage(PaintingModifyMessage.class, PaintingModifyMessage::new);
-        NetworkHandler.registerMessage(RegisterPaintingRequest.class, RegisterPaintingRequest::new);
-        NetworkHandler.registerMessage(PaintingDeleteRequest.class, PaintingDeleteRequest::new);
-        NetworkHandler.registerMessage(UploadPaintingRequest.class, UploadPaintingRequest::new);
-        NetworkHandler.registerMessage(RegisterPaintingResponse.class, RegisterPaintingResponse::new);
-        NetworkHandler.registerMessage(OpenGuiRequest.class, OpenGuiRequest::new);
+        NetworkHandler.registerMessage(ImageRequest.ID, ImageRequest.STREAM_CODEC);
+        NetworkHandler.registerMessage(PaintingListMessage.ID, PaintingListMessage.STREAM_CODEC);
+        NetworkHandler.registerMessage(ImageResponse.ID, ImageResponse.STREAM_CODEC);
+        NetworkHandler.registerMessage(PaintingModifyRequest.ID, PaintingModifyRequest.STREAM_CODEC);
+        NetworkHandler.registerMessage(PaintingModifyMessage.ID, PaintingModifyMessage.STREAM_CODEC);
+        NetworkHandler.registerMessage(RegisterPaintingRequest.ID, RegisterPaintingRequest.STREAM_CODEC);
+        NetworkHandler.registerMessage(PaintingDeleteRequest.ID, PaintingDeleteRequest.STREAM_CODEC);
+        NetworkHandler.registerMessage(UploadPaintingRequest.ID, UploadPaintingRequest.STREAM_CODEC);
+        NetworkHandler.registerMessage(RegisterPaintingResponse.ID, RegisterPaintingResponse.STREAM_CODEC);
+        NetworkHandler.registerMessage(OpenGuiRequest.ID, OpenGuiRequest.STREAM_CODEC);
     }
 }

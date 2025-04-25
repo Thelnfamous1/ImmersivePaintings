@@ -80,6 +80,7 @@ components.java {
 
 // Update mods.toml with the new versions automatically
 // Not using processResources because it is easier to do this manually, and see it reflected immediately
+/*
 afterEvaluate {
     file("src/main/resources/META-INF/mods.toml").withOutputStream {
         it << file("mods.toml").text
@@ -88,3 +89,4 @@ afterEvaluate {
                 .replaceAll("@FORGE_VERSION@", rootProject.neoforge_version)
     }
 }
+ */

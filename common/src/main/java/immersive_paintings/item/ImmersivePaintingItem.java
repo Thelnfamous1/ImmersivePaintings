@@ -2,12 +2,13 @@ package immersive_paintings.item;
 
 import immersive_paintings.entity.AbstractImmersiveDecorationEntity;
 import immersive_paintings.entity.ImmersivePaintingEntity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -40,9 +41,9 @@ public class ImmersivePaintingItem extends Item {
             World world = context.getWorld();
             ImmersivePaintingEntity paintingEntity = newPainting(world, attachmentPosition, direction, rotation);
 
-            NbtCompound nbtCompound = itemStack.getNbt();
-            if (nbtCompound != null) {
-                EntityType.loadFromEntityNbt(world, playerEntity, paintingEntity, nbtCompound);
+            NbtComponent customData = itemStack.get(DataComponentTypes.CUSTOM_DATA);
+            if(customData != null){
+                EntityType.loadFromEntityNbt(world, playerEntity, paintingEntity, customData);
             }
 
             if (paintingEntity.canStayAttached()) {

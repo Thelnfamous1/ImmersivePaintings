@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[21,)"
+loaderVersion = "[4,)"
 issueTrackerURL = "https://github.com/Luke100000/ImmersivePaintings/issues"
 license = "GPL-3.0-only"
 
@@ -21,8 +21,11 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.immersive_paintings]]
-modId = "forge"
+modId = "neoforge"
 mandatory = true
-versionRange = "[21,)"
+versionRange = "[21.1,)"
 ordering = "NONE"
 side = "BOTH"
+
+#[[mixins]]
+#config = "immersive_paintings.mixin.json"

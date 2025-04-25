@@ -33,9 +33,9 @@ public class FrameLoader extends JsonDataLoader {
                 JsonObject object = entry.getValue().getAsJsonObject();
 
                 Frame frame = new Frame(
-                        new Identifier(JsonHelper.getString(object, "frame", DEFAULT_FRAME)),
+                        Identifier.of(JsonHelper.getString(object, "frame", DEFAULT_FRAME)),
                         JsonHelper.getBoolean(object, "diagonals", false),
-                        new Identifier(JsonHelper.getString(object, "material", DEFAULT_MATERIAL)));
+                        Identifier.of(JsonHelper.getString(object, "material", DEFAULT_MATERIAL)));
 
                 frames.put(entry.getKey(), frame);
             } catch (Exception e) {

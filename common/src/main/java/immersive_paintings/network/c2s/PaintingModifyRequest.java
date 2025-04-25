@@ -1,5 +1,6 @@
 package immersive_paintings.network.c2s;
 
+import immersive_paintings.Main;
 import immersive_paintings.cobalt.network.NetworkHandler;
 import immersive_paintings.entity.ImmersivePaintingEntity;
 import immersive_paintings.network.PaintingDataMessage;
@@ -7,9 +8,13 @@ import immersive_paintings.network.s2c.PaintingModifyMessage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class PaintingModifyRequest extends PaintingDataMessage {
+    public static final CustomPayload.Id<PaintingModifyRequest> ID = new CustomPayload.Id<>(Main.locate("painting_modify_request"));
+    public static final PacketCodec<PacketByteBuf, PaintingModifyRequest> STREAM_CODEC = PacketCodec.of(PaintingModifyRequest::encode, PaintingModifyRequest::new);
     public PaintingModifyRequest(ImmersivePaintingEntity painting) {
         super(painting);
     }
@@ -27,5 +32,10 @@ public class PaintingModifyRequest extends PaintingDataMessage {
             painting.setMaterial(getMaterial());
             e.getWorld().getPlayers().forEach(p -> NetworkHandler.sendToPlayer(new PaintingModifyMessage(painting), (ServerPlayerEntity)p));
         }
+    }
+
+    @Override
+    public Id<? extends CustomPayload> getId() {
+        return ID;
     }
 }

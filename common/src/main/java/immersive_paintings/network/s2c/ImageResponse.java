@@ -1,5 +1,6 @@
 package immersive_paintings.network.s2c;
 
+import immersive_paintings.Main;
 import immersive_paintings.network.SegmentedPaintingMessage;
 import immersive_paintings.resources.ByteImage;
 import immersive_paintings.resources.Cache;
@@ -7,9 +8,13 @@ import immersive_paintings.resources.ClientPaintingManager;
 import immersive_paintings.resources.Painting;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
 public class ImageResponse extends SegmentedPaintingMessage {
+    public static final CustomPayload.Id<ImageResponse> ID = new CustomPayload.Id<>(Main.locate("image_response"));
+    public static final PacketCodec<PacketByteBuf, ImageResponse> STREAM_CODEC = PacketCodec.of(ImageResponse::encode, ImageResponse::new);
     private final String identifier;
     private final Painting.Type type;
 
@@ -33,7 +38,7 @@ public class ImageResponse extends SegmentedPaintingMessage {
 
     @Override
     protected void process(PlayerEntity e, ByteImage image) {
-        Painting painting = ClientPaintingManager.getPaintings().get(new Identifier(identifier));
+        Painting painting = ClientPaintingManager.getPaintings().get(Identifier.of(identifier));
         Painting.Texture texture = painting.getTexture(type);
         texture.image = image;
         ClientPaintingManager.registerImage(texture);
@@ -46,5 +51,10 @@ public class ImageResponse extends SegmentedPaintingMessage {
 
         b.writeString(identifier);
         b.writeEnumConstant(type);
+    }
+
+    @Override
+    public Id<? extends CustomPayload> getId() {
+        return ID;
     }
 }

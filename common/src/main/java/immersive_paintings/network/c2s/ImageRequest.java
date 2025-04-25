@@ -1,5 +1,6 @@
 package immersive_paintings.network.c2s;
 
+import immersive_paintings.Main;
 import immersive_paintings.cobalt.network.Message;
 import immersive_paintings.network.LazyNetworkManager;
 import immersive_paintings.network.s2c.ImageResponse;
@@ -8,12 +9,16 @@ import immersive_paintings.resources.ServerPaintingManager;
 import immersive_paintings.util.Utils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
 import java.util.Optional;
 
 public class ImageRequest extends Message {
+    public static final CustomPayload.Id<ImageRequest> ID = new CustomPayload.Id<>(Main.locate("image_request"));
+    public static final PacketCodec<PacketByteBuf, ImageRequest> STREAM_CODEC = PacketCodec.of(ImageRequest::encode, ImageRequest::new);
     private final String identifier;
     private final Painting.Type type;
 
@@ -35,8 +40,13 @@ public class ImageRequest extends Message {
 
     @Override
     public void receive(PlayerEntity e) {
-        Identifier identifier = new Identifier(this.identifier);
+        Identifier identifier = Identifier.of(this.identifier);
         Optional<byte[]> image = ServerPaintingManager.getImageData(identifier, type);
         image.ifPresent(i -> Utils.processByteArrayInChunks(i, (ints, split, splits) -> LazyNetworkManager.sendToClient(new ImageResponse(identifier, type, ints, split, splits), (ServerPlayerEntity)e)));
+    }
+
+    @Override
+    public Id<? extends CustomPayload> getId() {
+        return ID;
     }
 }

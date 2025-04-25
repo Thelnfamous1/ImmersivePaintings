@@ -1,50 +1,36 @@
 package immersive_paintings.forge.cobalt.network;
 
-import immersive_paintings.Main;
 import immersive_paintings.cobalt.network.Message;
 import immersive_paintings.cobalt.network.NetworkHandler;
+import immersive_paintings.forge.CommonForge;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
-
-import java.util.function.Function;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class NetworkHandlerImpl extends NetworkHandler.Impl {
     private static final String PROTOCOL_VERSION = "1";
 
-    private final SimpleChannel channel = NetworkRegistry.newSimpleChannel(
-            new Identifier(Main.SHORT_MOD_ID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
-
-    private int id = 0;
-
     @Override
-    public <T extends Message> void registerMessage(Class<T> msg, Function<PacketByteBuf, T> constructor) {
-        channel.registerMessage(id++, msg,
-                Message::encode,
-                constructor,
-                (m, ctx) -> {
-                    ctx.get().enqueueWork(() -> {
-                        ServerPlayerEntity sender = ctx.get().getSender();
-                        m.receive(sender);
-                    });
-                    ctx.get().setPacketHandled(true);
-                });
+    public <T extends Message> void registerMessage(CustomPayload.Id<T> id, PacketCodec<PacketByteBuf, T> packetCodec) {
+        CommonForge.getModBus().addListener((RegisterPayloadHandlersEvent event) -> {
+            PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
+            registrar.playBidirectional(id, packetCodec, (msg, context) -> {
+                context.enqueueWork(() -> msg.receive(context.player()));
+            });
+        });
     }
 
     @Override
     public void sendToServer(Message m) {
-        channel.sendToServer(m);
+        PacketDistributor.sendToServer(m);
     }
 
     @Override
     public void sendToPlayer(Message m, ServerPlayerEntity e) {
-        channel.send(PacketDistributor.PLAYER.with(() -> e), m);
+        PacketDistributor.sendToPlayer(e, m);
     }
 }

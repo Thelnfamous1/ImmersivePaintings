@@ -1,16 +1,15 @@
 package immersive_paintings.forge.cobalt.registration;
 
 import immersive_paintings.cobalt.registration.Registration;
+import immersive_paintings.forge.CommonForge;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.EntityRenderers;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -54,7 +53,7 @@ public class RegistrationImpl extends Registration.Impl {
         public <T> DeferredRegister get(Registry<? super T> registry) {
             Identifier id = registry.getKey().getValue();
             if (!registries.containsKey(id) && !skipped.contains(id)) {
-                ForgeRegistry reg = RegistryManager.ACTIVE.getRegistry(id);
+                Registry<?> reg = Registries.REGISTRIES.get(id);
                 if (reg == null) {
                     skipped.add(id);
                     return null;
@@ -62,7 +61,7 @@ public class RegistrationImpl extends Registration.Impl {
 
                 DeferredRegister def = DeferredRegister.create(Objects.requireNonNull(reg, "Registry=" + id), namespace);
 
-                def.register(FMLJavaModLoadingContext.get().getModEventBus());
+                def.register(CommonForge.getModBus());
 
                 registries.put(id, def);
             }

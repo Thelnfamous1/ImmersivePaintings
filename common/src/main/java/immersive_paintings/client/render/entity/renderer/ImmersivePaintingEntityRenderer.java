@@ -80,13 +80,13 @@ public class ImmersivePaintingEntityRenderer<T extends ImmersivePaintingEntity> 
 
         //canvas
         vertexConsumer = vertexConsumerProvider.getBuffer(isTranslucent() ? RenderLayer.getEntityTranslucent(getTexture(entity)) : RenderLayer.getEntitySolid(getTexture(entity)));
-        renderFaces(isTranslucent() ? "objects/graffiti.obj" : "objects/canvas.obj", posMat, normMat, vertexConsumer, getLight(light), width, height, hasFrame ? 1.0f : 0.0f);
+        renderFaces(isTranslucent() ? "objects/graffiti.obj" : "objects/canvas.obj", matrices.peek(), posMat, normMat, vertexConsumer, getLight(light), width, height, hasFrame ? 1.0f : 0.0f);
 
         //frame
         int frameLight = getFrameLight(light);
         if (hasFrame) {
             vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEntityCutout(entity.getMaterial()));
-            renderFrame(entity.getFrame(), posMat, normMat, vertexConsumer, frameLight, width, height);
+            renderFrame(entity.getFrame(), matrices.peek(), posMat, normMat, vertexConsumer, frameLight, width, height);
         }
     }
 
@@ -94,11 +94,11 @@ public class ImmersivePaintingEntityRenderer<T extends ImmersivePaintingEntity> 
         return false;
     }
 
-    private void renderFaces(String name, Matrix4f posMat, Matrix3f normMat, VertexConsumer vertexConsumer, int light, float width, float height, float margin) {
+    private void renderFaces(String name, MatrixStack.Entry entry, Matrix4f posMat, Matrix3f normMat, VertexConsumer vertexConsumer, int light, float width, float height, float margin) {
         List<Face> faces = ObjectLoader.objects.get(Main.locate(name));
         for (Face face : faces) {
             for (FaceVertex v : face.vertices) {
-                vertex(posMat,
+                vertex(entry, posMat,
                         normMat,
                         vertexConsumer,
                         v.v.x * (width - margin * 2),
@@ -115,7 +115,7 @@ public class ImmersivePaintingEntityRenderer<T extends ImmersivePaintingEntity> 
     }
 
     private List<Face> getFaces(Identifier frame, String part) {
-        Identifier id = new Identifier(frame.getNamespace(), frame.getPath() + "/" + part + ".obj");
+        Identifier id = Identifier.of(frame.getNamespace(), frame.getPath() + "/" + part + ".obj");
         if (ObjectLoader.objects.containsKey(id)) {
             return ObjectLoader.objects.get(id);
         } else {
@@ -123,13 +123,13 @@ public class ImmersivePaintingEntityRenderer<T extends ImmersivePaintingEntity> 
         }
     }
 
-    private void renderFrame(Identifier frame, Matrix4f posMat, Matrix3f normMat, VertexConsumer vertexConsumer, int light, float width, float height) {
+    private void renderFrame(Identifier frame, MatrixStack.Entry entry, Matrix4f posMat, Matrix3f normMat, VertexConsumer vertexConsumer, int light, float width, float height) {
         List<Face> faces = getFaces(frame, "bottom");
         for (int x = 0; x < width / 16; x++) {
             float u = width == 16 ? 0.75f : (x == 0 ? 0.0f : x == width / 16 - 1 ? 0.5f : 0.25f);
             for (Face face : faces) {
                 for (FaceVertex v : face.vertices) {
-                    vertex(posMat, normMat, vertexConsumer, v.v.x + x * 16 - (width - 16) / 2, v.v.y - (height - 16) / 2, v.v.z, v.t.u * 0.25f + u, (1.0f - v.t.v), v.n.x, v.n.y, v.n.z, light);
+                    vertex(entry, posMat, normMat, vertexConsumer, v.v.x + x * 16 - (width - 16) / 2, v.v.y - (height - 16) / 2, v.v.z, v.t.u * 0.25f + u, (1.0f - v.t.v), v.n.x, v.n.y, v.n.z, light);
                 }
             }
         }
@@ -138,7 +138,7 @@ public class ImmersivePaintingEntityRenderer<T extends ImmersivePaintingEntity> 
             float u = width == 16 ? 0.75f : (x == 0 ? 0.0f : x == width / 16 - 1 ? 0.5f : 0.25f);
             for (Face face : faces) {
                 for (FaceVertex v : face.vertices) {
-                    vertex(posMat, normMat, vertexConsumer, v.v.x + x * 16 - (width - 16) / 2, v.v.y + (height - 16) / 2, v.v.z, v.t.u * 0.25f + u, (1.0f - v.t.v), v.n.x, v.n.y, v.n.z, light);
+                    vertex(entry, posMat, normMat, vertexConsumer, v.v.x + x * 16 - (width - 16) / 2, v.v.y + (height - 16) / 2, v.v.z, v.t.u * 0.25f + u, (1.0f - v.t.v), v.n.x, v.n.y, v.n.z, light);
                 }
             }
         }
@@ -147,7 +147,7 @@ public class ImmersivePaintingEntityRenderer<T extends ImmersivePaintingEntity> 
             float u = 0.25f;
             for (Face face : faces) {
                 for (FaceVertex v : face.vertices) {
-                    vertex(posMat, normMat, vertexConsumer, v.v.x + (width - 16) / 2, v.v.y + y * 16 - (height - 16) / 2, v.v.z, v.t.u * 0.25f + u, (1.0f - v.t.v), v.n.x, v.n.y, v.n.z, light);
+                    vertex(entry, posMat, normMat, vertexConsumer, v.v.x + (width - 16) / 2, v.v.y + y * 16 - (height - 16) / 2, v.v.z, v.t.u * 0.25f + u, (1.0f - v.t.v), v.n.x, v.n.y, v.n.z, light);
                 }
             }
         }
@@ -156,13 +156,13 @@ public class ImmersivePaintingEntityRenderer<T extends ImmersivePaintingEntity> 
             float u = 0.25f;
             for (Face face : faces) {
                 for (FaceVertex v : face.vertices) {
-                    vertex(posMat, normMat, vertexConsumer, v.v.x - (width - 16) / 2, v.v.y + y * 16 - (height - 16) / 2, v.v.z, v.t.u * 0.25f + u, (1.0f - v.t.v), v.n.x, v.n.y, v.n.z, light);
+                    vertex(entry, posMat, normMat, vertexConsumer, v.v.x - (width - 16) / 2, v.v.y + y * 16 - (height - 16) / 2, v.v.z, v.t.u * 0.25f + u, (1.0f - v.t.v), v.n.x, v.n.y, v.n.z, light);
                 }
             }
         }
     }
 
-    private void vertex(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertexConsumer, float x, float y, float z, float u, float v, float normalX, float normalY, float normalZ, int light) {
-        vertexConsumer.vertex(positionMatrix, x, y, z - 0.5f).color(255, 255, 255, 255).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(normalMatrix, normalX, normalY, normalZ).next();
+    private void vertex(MatrixStack.Entry entry, Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertexConsumer, float x, float y, float z, float u, float v, float normalX, float normalY, float normalZ, int light) {
+        vertexConsumer.vertex(positionMatrix, x, y, z - 0.5f).color(255, 255, 255, 255).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, normalX, normalY, normalZ);
     }
 }

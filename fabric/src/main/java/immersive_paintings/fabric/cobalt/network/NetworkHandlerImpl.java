@@ -1,48 +1,30 @@
 package immersive_paintings.fabric.cobalt.network;
 
-import immersive_paintings.Main;
 import immersive_paintings.cobalt.network.Message;
 import immersive_paintings.cobalt.network.NetworkHandler;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
 
 public class NetworkHandlerImpl extends NetworkHandler.Impl {
-    private final Map<Class<?>, Identifier> identifiers = new HashMap<>();
-
-    private int id = 0;
-
-    private <T> Identifier createMessageIdentifier(Class<T> msg) {
-        return new Identifier(Main.SHORT_MOD_ID, msg.getSimpleName().toLowerCase(Locale.ROOT).substring(0, 8) + id++);
-    }
-
-    private Identifier getMessageIdentifier(Message msg) {
-        return Objects.requireNonNull(identifiers.get(msg.getClass()), "Used unregistered message!");
-    }
 
     @Override
-    public <T extends Message> void registerMessage(Class<T> msg, Function<PacketByteBuf, T> constructor) {
-        Identifier identifier = createMessageIdentifier(msg);
-        identifiers.put(msg, identifier);
-
-        ServerPlayNetworking.registerGlobalReceiver(identifier, (server, player, handler, buffer, responder) -> {
-            Message m = constructor.apply(buffer);
-            server.execute(() -> m.receive(player));
+    public <T extends Message> void registerMessage(CustomPayload.Id<T> id, PacketCodec<PacketByteBuf, T> packetCodec) {
+        PayloadTypeRegistry.playS2C().register(id, packetCodec);
+        PayloadTypeRegistry.playC2S().register(id, packetCodec);
+        ServerPlayNetworking.registerGlobalReceiver(id, (msg, context) -> {
+            context.server().execute(() -> msg.receive(context.player()));
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientProxy.register(identifier, constructor);
+            ClientProxy.register(id, packetCodec);
         }
     }
 
@@ -50,14 +32,14 @@ public class NetworkHandlerImpl extends NetworkHandler.Impl {
     public void sendToServer(Message msg) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         msg.encode(buf);
-        ClientPlayNetworking.send(getMessageIdentifier(msg), buf);
+        ClientPlayNetworking.send(msg);
     }
 
     @Override
     public void sendToPlayer(Message msg, ServerPlayerEntity e) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         msg.encode(buf);
-        ServerPlayNetworking.send(e, getMessageIdentifier(msg), buf);
+        ServerPlayNetworking.send(e, msg);
     }
 
     // Fabric's APIs are not side-agnostic.
@@ -67,10 +49,9 @@ public class NetworkHandlerImpl extends NetworkHandler.Impl {
             throw new RuntimeException("new ClientProxy()");
         }
 
-        public static <T extends Message> void register(Identifier id, Function<PacketByteBuf, T> constructor) {
-            ClientPlayNetworking.registerGlobalReceiver(id, (client, ignore1, buffer, ignore2) -> {
-                Message m = constructor.apply(buffer);
-                client.execute(() -> m.receive(client.player));
+        public static <T extends Message> void register(CustomPayload.Id<T> id, PacketCodec<PacketByteBuf, T> packetCodec) {
+            ClientPlayNetworking.registerGlobalReceiver(id, (m, context) -> {
+                context.client().execute(() -> m.receive(context.player()));
             });
         }
     }

@@ -1,15 +1,15 @@
 package immersive_paintings.cobalt.network;
 
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
-
-import java.util.function.Function;
 
 public abstract class NetworkHandler {
     private static Impl INSTANCE;
 
-    public static <T extends Message> void registerMessage(Class<T> msg, Function<PacketByteBuf, T> constructor) {
-        INSTANCE.registerMessage(msg, constructor);
+    public static <T extends Message> void registerMessage(CustomPayload.Id<T> id, PacketCodec<PacketByteBuf, T> packetCodec) {
+        INSTANCE.registerMessage(id, packetCodec);
     }
 
     public static void sendToServer(Message m) {
@@ -21,11 +21,12 @@ public abstract class NetworkHandler {
     }
 
     public abstract static class Impl {
+
         protected Impl() {
             INSTANCE = this;
         }
 
-        public abstract <T extends Message> void registerMessage(Class<T> msg, Function<PacketByteBuf, T> constructor);
+        public abstract <T extends Message> void registerMessage(CustomPayload.Id<T> id, PacketCodec<PacketByteBuf, T> packetCodec);
 
         public abstract void sendToServer(Message m);
 

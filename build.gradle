@@ -87,7 +87,8 @@ allprojects {
     apply plugin: "architectury-plugin"
 
     archivesBaseName = rootProject.archives_base_name
-    version = getAppVersion()
+    //version = getAppVersion()
+    version = rootProject.mod_version
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"

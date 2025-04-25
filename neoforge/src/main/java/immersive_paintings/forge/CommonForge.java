@@ -4,23 +4,30 @@ import immersive_paintings.*;
 import immersive_paintings.forge.cobalt.network.NetworkHandlerImpl;
 import immersive_paintings.forge.cobalt.registration.RegistrationImpl;
 import net.minecraft.item.ItemGroup;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegisterEvent;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import static net.minecraft.registry.RegistryKeys.ITEM_GROUP;
 
 @Mod(Main.MOD_ID)
-@Mod.EventBusSubscriber(modid = Main.MOD_ID, bus = Bus.MOD)
+@EventBusSubscriber(modid = Main.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public final class CommonForge {
-    public CommonForge() {
+    private static IEventBus modBus;
+    public CommonForge(IEventBus modBus, ModContainer container) {
         RegistrationImpl.bootstrap();
         new NetworkHandlerImpl();
-        DEF_REG.register(FMLJavaModLoadingContext.get().getModEventBus());
+        DEF_REG.register(modBus);
+        CommonForge.modBus = modBus;
+    }
+
+    public static IEventBus getModBus() {
+        return modBus;
     }
 
     @SubscribeEvent
@@ -32,7 +39,7 @@ public final class CommonForge {
 
     public static final DeferredRegister<ItemGroup> DEF_REG = DeferredRegister.create(ITEM_GROUP, Main.MOD_ID);
 
-    public static final RegistryObject<ItemGroup> TAB = DEF_REG.register(Main.MOD_ID, () -> ItemGroup.builder()
+    public static final DeferredHolder<ItemGroup, ItemGroup> TAB = DEF_REG.register(Main.MOD_ID, () -> ItemGroup.builder()
             .displayName(ItemGroups.getDisplayName())
             .icon(ItemGroups::getIcon)
             .entries((featureFlags, output) -> output.addAll(Items.getSortedItems()))

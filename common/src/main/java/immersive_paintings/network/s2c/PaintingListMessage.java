@@ -7,12 +7,16 @@ import immersive_paintings.resources.ServerPaintingManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PaintingListMessage extends Message {
+    public static final CustomPayload.Id<PaintingListMessage> ID = new CustomPayload.Id<>(Main.locate("painting_list_message"));
+    public static final PacketCodec<PacketByteBuf, PaintingListMessage> STREAM_CODEC = PacketCodec.of(PaintingListMessage::encode, PaintingListMessage::new);
     private final Map<String, NbtCompound> paintings = new HashMap<>();
     private final boolean clear;
 
@@ -65,7 +69,7 @@ public class PaintingListMessage extends Message {
     public Map<Identifier, Painting> getPaintings() {
         Map<Identifier, Painting> paintings = new HashMap<>();
         for (Map.Entry<String, NbtCompound> entry : this.paintings.entrySet()) {
-            Identifier identifier = new Identifier(entry.getKey());
+            Identifier identifier = Identifier.of(entry.getKey());
             if (entry.getValue() == null) {
                 paintings.put(identifier, null);
             } else {
@@ -77,5 +81,10 @@ public class PaintingListMessage extends Message {
 
     public boolean shouldClear() {
         return clear;
+    }
+
+    @Override
+    public Id<? extends CustomPayload> getId() {
+        return ID;
     }
 }

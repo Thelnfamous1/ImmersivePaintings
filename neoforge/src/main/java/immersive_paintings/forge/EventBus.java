@@ -7,22 +7,23 @@ import immersive_paintings.network.LazyNetworkManager;
 import immersive_paintings.resources.PaintingsLoader;
 import immersive_paintings.resources.ServerPaintingManager;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-@Mod.EventBusSubscriber(modid = Main.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = Main.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public class EventBus {
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
+    public static void onServerTick(ServerTickEvent.Pre event) {
         LazyNetworkManager.tickServer();
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
+    public static void onClientTick(ClientTickEvent.Pre event) {
         LazyNetworkManager.tickClient();
     }
 
@@ -41,7 +42,7 @@ public class EventBus {
     public static boolean firstLoad = true;
 
     @SubscribeEvent
-    public static void onClientStart(TickEvent.ClientTickEvent event) {
+    public static void onClientStart(ClientTickEvent.Pre event) {
         //forge decided to be funny and won't trigger the client load event
         if (firstLoad) {
             ClientMain.postLoad();

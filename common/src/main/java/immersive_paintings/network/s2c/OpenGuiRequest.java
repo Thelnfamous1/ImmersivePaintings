@@ -4,8 +4,12 @@ import immersive_paintings.Main;
 import immersive_paintings.cobalt.network.Message;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 
 public class OpenGuiRequest extends Message {
+    public static final CustomPayload.Id<OpenGuiRequest> ID = new CustomPayload.Id<>(Main.locate("open_gui_request"));
+    public static final PacketCodec<PacketByteBuf, OpenGuiRequest> STREAM_CODEC = PacketCodec.of(OpenGuiRequest::encode, OpenGuiRequest::new);
     public final Type gui;
 
     public final int entity;
@@ -46,6 +50,11 @@ public class OpenGuiRequest extends Message {
     @Override
     public void receive(PlayerEntity e) {
         Main.networkManager.handleOpenGuiRequest(this);
+    }
+
+    @Override
+    public Id<? extends CustomPayload> getId() {
+        return ID;
     }
 
     public enum Type {

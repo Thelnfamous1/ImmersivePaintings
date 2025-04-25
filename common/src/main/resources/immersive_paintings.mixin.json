@@ -1,8 +1,8 @@
 {
   "required": true,
-  "minVersion": "0.7",
   "package": "immersive_paintings.mixin",
-  "compatibilityLevel": "JAVA_16",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
   "mixins": [
   ],
   "client": [

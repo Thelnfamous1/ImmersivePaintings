@@ -13,12 +13,16 @@ import immersive_paintings.util.Utils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
 import java.util.Objects;
 
 public class RegisterPaintingRequest extends Message {
+    public static final CustomPayload.Id<RegisterPaintingRequest> ID = new CustomPayload.Id<>(Main.locate("register_painting_request"));
+    public static final PacketCodec<PacketByteBuf, RegisterPaintingRequest> STREAM_CODEC = PacketCodec.of(RegisterPaintingRequest::encode, RegisterPaintingRequest::new);
     private final String name;
     private final NbtCompound painting;
 
@@ -85,5 +89,10 @@ public class RegisterPaintingRequest extends Message {
 
     private void error(String error, PlayerEntity e, Identifier i) {
         NetworkHandler.sendToPlayer(new RegisterPaintingResponse(error, i), (ServerPlayerEntity)e);
+    }
+
+    @Override
+    public Id<? extends CustomPayload> getId() {
+        return ID;
     }
 }
